@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Полезные ссылки{% endblock %}</title>
+    <link href="http://10.13.120.6/cdn/btstrp/css/bootstrap.min.css" rel="stylesheet">
+    <link href="http://10.13.120.6/cdn/btstrp/css/bootstrap-icons.css" rel="stylesheet">
+    
+    
+</head>
+<body style="background: url('http://10.13.120.6/cdn/img/links/1920.svg'); background-color: #f9f9f9;">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'main:home' %}">
+            <i class="bi bi-filetype-html"></i> Полезные ссылки  <i class="bi bi-filetype-html"></i>
+        </a>
+        <div class="navbar-nav">
+            <a class="nav-link" href="{% url 'main:links_list' %}">Ссылки</a>
+            <a class="nav-link" href="{% url 'main:districts_list' %}">Районы</a>
+            <a class="nav-link" href="{% url 'passgen:passgen' %}">Генератор паролей</a>
+            <a class="nav-link" href="/admin/">Админка <i class="bi bi-box-arrow-in-right text-warning"></i></a>
+            
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    {% if messages %}
+        {% for m in messages %}
+            <div class="alert alert-{{ m.tags|default:'info' }} alert-dismissible fade show">
+                {{ m }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% block content %}{% endblock %}
+</div>
+<br>
+<footer>
+    <div class="container">
+        <p>CopyRight &copy; {% now "Y" %}</p>
+    </div>
+    
+</footer>
+<script src="http://10.13.120.6/cdn/btstrp/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

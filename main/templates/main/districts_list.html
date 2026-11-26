@@ -1,0 +1,61 @@
+{% extends "main/base.html" %}
+{% block title %}Районы СФР{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0 fw-bold">Районы СФР</h1>
+
+</div>
+
+
+<div class="card shadow-sm">
+
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Код района</th>
+                    <th>Наименование</th>
+                    <th>подсеть <i class="bi bi-pci-card-network"></i></th>
+                    <th>телефон <i class="bi bi-phone-vibrate"></i></th>
+                    <th>Адрес <i class="bi bi-house-check"></i></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in districts %}
+                <tr>
+                    <td class="pb-1 pt-1">{{ d.code }}</td>
+                    <td class="pb-1 pt-1">{{ d.dname }}</td>
+                    <td class="pb-1 pt-1"><code>{{ d.subnet }}</code></td>
+                    <td class="pb-1 pt-1">{{ d.telef }}</td>
+                    <td class="pb-1 pt-1">{{ d.address }}</td>
+                    
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if is_paginated %}
+<nav class="mt-3">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?{{ querystring }}&page={{ page_obj.previous_page_number }}">«</a>
+            </li>
+        {% endif %}
+        <li class="page-item disabled">
+            <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        </li>
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?{{ querystring }}&page={{ page_obj.next_page_number }}">»</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

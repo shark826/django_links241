@@ -1,0 +1,187 @@
+{% extends "main/base.html" %}
+{% block title %}Генератор парольных фраз (ViPNet-стиль){% endblock %}
+
+{% block content %}
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif;  background: #f4f6f8; color: #1f2937; }
+        .card { max-width: 900px; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin: 0 auto; margin-bottom: 25px;  }
+        .header-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .badge { background: #e0e7ff; color: #3730a3; padding: 4px 10px; border-radius: 12px; font-size: 0.85em; font-weight: 600; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .section { margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb; }
+        label { display: block; margin-bottom: 10px; cursor: pointer; }
+        select, input[type="number"] { padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.95em; }
+        ul { list-style: none; padding: 0; margin: 0 0 15px 0; display: flex; gap: 20px; }
+        .btn { background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 1em; font-weight: 500; }
+        .btn:hover { background: #1d4ed8; }
+        .btn-copy { background: #10b981; font-size: 0.8em; padding: 5px 10px; }
+        .btn-copy:hover { background: #059669; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { text-align: left; padding: 12px 15px; border-bottom: 1px solid #e5e7eb; }
+        th { background: #f9fafb; font-weight: 600; color: #374151; }
+        tr:hover { background: #f8fafc; }
+        .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 1.05em; font-weight: 600; color: #111827; }
+        .copy-cell { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="header-info">
+        <h2 style="margin: 0;">Генератор паролей и парольных фраз</h2>
+        <span class="badge">Слов в базе: {{ dict_size }}</span>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="grid">
+            <div>
+                <strong>Режим работы:</strong>
+                {{ form.mode }}
+            </div>
+            <div>
+                <label>
+                    <strong>{{ form.batch_count.label }}:</strong><br>
+                    {{ form.batch_count }}
+                </label>
+            </div>
+        </div>
+
+        <div id="phrase-options" class="section">
+            <h4 style="margin-top: 0;">Настройки парольной фразы</h4>
+            <div class="grid">
+                <div>
+                    <label>{{ form.word_count.label }}:<br>{{ form.word_count }}</label>
+                    <label>{{ form.prefix_len.label }}:<br>{{ form.prefix_len }}</label>
+                </div>
+                <div>
+                    <label>{{ form.phrase_digits }} {{ form.phrase_digits.label }}</label>
+                    <label>{{ form.phrase_capitalize }} {{ form.phrase_capitalize.label }}</label>
+                   <label>
+                        {{ form.phrase_special.label }}: {{ form.phrase_special }}
+                    </label>
+                    {% if form.phrase_special.errors %}
+                        <div style="color: #dc2626; font-size: 0.85em; margin-top: -6px; margin-bottom: 8px;">
+                            {{ form.phrase_special.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div id="password-options" class="section" style="display: none;">
+            <h4 style="margin-top: 0;">Настройки классического пароля</h4>
+            <label>{{ form.length.label }}: {{ form.length }}</label>
+            <label>{{ form.use_upper }} {{ form.use_upper.label }}</label>
+            <label>{{ form.use_digits }} {{ form.use_digits.label }}</label>
+            <label>{{ form.use_special }} {{ form.use_special.label }}</label>
+        </div>
+
+        <div class="section">
+            <button type="submit" class="btn">Сгенерировать</button>
+        </div>
+    </form>
+</div>
+
+{% if results %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3 style="margin: 0;">Сгенерированные варианты</h3>
+        <div style="display: flex; gap: 10px;">
+            <a href="{% url 'passgen:export_passwords' 'csv' %}" class="btn" style="background: #059669; text-decoration: none; font-size: 0.9em; padding: 8px 14px;">Скачать CSV</a>
+            <a href="{% url 'passgen:export_passwords' 'txt' %}" class="btn" style="background: #4b5563; text-decoration: none; font-size: 0.9em; padding: 8px 14px;">Скачать TXT</a>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 55%;">Парольная фраза (для запоминания)</th>
+                <th style="width: 45%;">Пароль (EN-раскладка / склейка)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in results %}
+            <tr>
+                <td>
+                    <div class="copy-cell">
+                        <span>{{ item.phrase }}</span>
+                        {% if item.phrase != '— (Случайный набор символов)' %}
+                        <button type="button" class="btn btn-copy" onclick="copyText(this, '{{ item.phrase|escapejs }}')">Копировать</button>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    <div class="copy-cell">
+                        <span class="mono">{{ item.password }}</span>
+                        <button type="button" class="btn btn-copy" onclick="copyText(this, '{{ item.password|escapejs }}')">Копировать</button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+
+<script>
+    const radios = document.querySelectorAll('input[name="mode"]');
+    const phraseOpts = document.getElementById('phrase-options');
+    const passOpts = document.getElementById('password-options');
+
+    function toggleOptions() {
+        const selected = document.querySelector('input[name="mode"]:checked').value;
+        phraseOpts.style.display = selected === 'phrase' ? 'block' : 'none';
+        passOpts.style.display = selected === 'password' ? 'block' : 'none';
+    }
+
+    radios.forEach(r => r.addEventListener('change', toggleOptions));
+    toggleOptions();
+
+    function showCopiedFeedback(btn) {
+        const originalText = btn.innerText;
+        btn.innerText = 'Готово!';
+        btn.style.background = '#374151';
+        setTimeout(() => {
+            btn.innerText = originalText;
+            btn.style.background = '';
+        }, 1200);
+    }
+
+    function fallbackCopyText(btn, text) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.top = '0';
+        textArea.style.left = '0';
+        textArea.style.opacity = '0';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+                showCopiedFeedback(btn);
+            }
+        } catch (err) {
+            console.error('Ошибка копирования:', err);
+        }
+        document.body.removeChild(textArea);
+    }
+
+    function copyText(btn, text) {
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text)
+                .then(() => showCopiedFeedback(btn))
+                .catch(() => fallbackCopyText(btn, text));
+        } else {
+            fallbackCopyText(btn, text);
+        }
+    }
+</script>
+
+{% endblock %}
+</body>
+</html>
