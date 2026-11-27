@@ -21,5 +21,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("", include("main.urls")),
     path("", include("passgen.urls")),
+    path('cards/', include('cardhtml.urls'))
 
 ]

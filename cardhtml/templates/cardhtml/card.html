@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Парольная карта — {{ name }}</title>
+    <link rel="stylesheet" href="http://10.13.120.6/cer/css/stylecard.css">
+    <link rel="stylesheet" href="stylecard.css">
+</head>
+<body>
+    <h4>Пароль действует с {{ valid_from }} по {{ valid_to }}</h4>
+    <table class="tablestyle">
+        <tr>
+            <td>ФИО</td>
+            <td class="blankcell"></td>
+            <td>{{ name }}</td>
+        </tr>
+        <tr>
+            <td>Логин</td>
+            <td class="blankcell"></td>
+            <td>{{ login }}</td>
+        </tr>
+        <tr>
+            <td>Пароль</td>
+            <td class="blankcell"></td>
+            <td class="passcell">{{ password }}</td>           
+        </tr>
+        <tr>
+            <td>Парольная фраза</td>
+            <td class="blankcell"></td>
+            <td>
+                <span class="passphrase">{{ numpass }} {{ p1_head }}</span>{{ p1_tail }} 
+                <span class="passphrase">{{ p2_head }}</span>{{ p2_tail }} 
+                <span class="passphrase">{{ p3_head }}</span>{{ p3_tail }}{% if has_exclamation %}<span class="passphrase"> !</span>{% endif %}
+            </td>           
+        </tr>
+    </table>
+</body>
+</html>

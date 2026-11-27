@@ -1,0 +1,23 @@
+{% extends "main/base.html" %}
+{% block title %}Формирование парольных карт в архив{% endblock %}
+
+{% block content %}
+<body>
+    <h2>Генерация парольных карт из CSV</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-group">
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.errors %}
+                    <div style="color: red;">{{ field.errors }}</div>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <button type="submit">Сгенерировать и скачать ZIP</button>
+    </form>
+
+{% endblock %}
+</body>
+</html>
